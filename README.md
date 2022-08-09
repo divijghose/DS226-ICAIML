@@ -1,2 +1,2 @@
 # DS226-ICAIML
-Material for Introduction to Computing for AI &amp; Machine Learning
+Materials for Introduction to Computing for AI &amp; Machine Learning (August-November '22)
