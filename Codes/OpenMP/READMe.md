@@ -68,7 +68,7 @@ export OMP_NUM_THREADS=4
 
 ## OpenMP thread functions
 Each thread can be represented by a thread ID. Knowing the thread ID and total number of threads helps us better understand the distribution of work.
-The call `omp_get_num_threads()` return the total number of threads. `omp_get_thread_num()` returns the thread ID of the thread being executed.
+The call `omp_get_num_threads()` returns the total number of threads. `omp_get_thread_num()` returns the thread ID of the thread being executed.
 ```
 #include <omp.h> // OpenMP Header file
 #include <stdio.h>
