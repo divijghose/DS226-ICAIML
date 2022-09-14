@@ -138,7 +138,7 @@ int t_num, t_id;
 
 ### Fork-Join Model : An example
 
-Since `t_num` is the same for all threads, we might be tempted to initialize it outside the parallel region to avoid repeating the initialization for each thread. The resulting error, in `ForkJoin.c` illustrates the fork-join model.
+Since `t_num` is the same for all threads, we might be tempted to initialize it outside the parallel region to avoid repeating the initialization for each thread. The resulting error, in `ForkJoin.c`, illustrates the fork-join model.
 ```
 #include <omp.h> // OpenMP Header file
 #include <stdio.h>
