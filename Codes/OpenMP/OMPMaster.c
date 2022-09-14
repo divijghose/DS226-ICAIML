@@ -3,15 +3,14 @@
 
 int main()
 {
-    int j;
-    int t_num, t_id; //Declaring t_num and t_id leads to a race condition
+    int t_num;
 #pragma omp parallel // Specify the block to be executed in parallel
     {
+        int t_id;
+#pragma omp master
         t_num = omp_get_num_threads(); // Get total number of OMP threads
-        t_id = omp_get_thread_num();   // Get ID of thread being executed
-        // for(j=0;j<10000000;j++); // Introduce time delay to make code fail everytime
+        t_id = omp_get_thread_num(); // Get ID of thread being executed
         printf("Hello World from thread %d of %d\n", t_id, t_num);
     }
-
     return 0;
 }

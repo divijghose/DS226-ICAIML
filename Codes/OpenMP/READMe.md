@@ -5,6 +5,12 @@
 3. [Thread functions](#openmp-thread-functions)
 4. [Race Conditions](#race-conditions)\
     a. [Scoping Variables](#scoping-variables)
+5. [Thread Synchronization](#thread-synchronization)\
+    a. [Fork-Join Model - An Example](#fork-join-model--an-example)\
+    b. [Thread Private Variables](#thread-private-variables)\
+    c. [#pragma omp barrier](#pragma-omp-barrier)\
+    d. [#pragma omp single](#pragma-omp-single)\
+    e. [#pragma omp master](#pragma-omp-master)
 
 ## What is OpenMP? 
 OpenMP (Open Multi-Processing) is an API that provides support for parallel programming in **shared-memory architectures**. It consists of compiler directives which are inserted in the code in regions that can be parallelised, a run-time library to execute these regions in parallel, and environment variables. OpenMP supports parallelism in C, C++ and Fortran, and is preffered for its portability and ease of use.
@@ -121,10 +127,144 @@ We can ensure that the previous code produces an incorrect result (_almost_) eve
     }
 ```
 ### Scoping variables
-We can prevent the race condition in the last example by declaring `t_id` as `private`.
+We can prevent the race condition in the last example by declaring `t_id` as `private`, as implemented in `ThreadIDs_Race_Scoping.c`
 ```
 int t_num, t_id;
 #pragma omp parallel private(t_id) shared(t_num)
+```
+
+[Back to contents](#contents)
+## Thread Synchronization
+
+### Fork-Join Model : An example
+
+Since `t_num` is the same for all threads, we might be tempted to initialize it outside the parallel region to avoid repeating the initialization for each thread. The resulting error, in `ForkJoin.c` illustrates the fork-join model.
+```
+#include <omp.h> // OpenMP Header file
+#include <stdio.h>
+
+int main()
+{
+    int t_num = omp_get_num_threads(); // Get total number of OMP threads
+
+#pragma omp parallel // Specify the block to be executed in parallel
+    {
+        int t_id = omp_get_thread_num(); // Get ID of thread being executed
+        printf("Hello World from thread %d of %d\n", t_id, t_num);
+    }
+
+    return 0;
+}
+```
+We can correct this, as seen in `ForkJoin_Corrected.c` by initializing `t_num` in a separate parallel block first, and then using it in the next parallel block.
+```
+#include <omp.h> // OpenMP Header file
+#include <stdio.h>
+
+int main()
+{
+    int t_num;
+#pragma omp parallel // Specify the block to be executed in parallel
+    {
+        int t_id = omp_get_thread_num(); // Get ID of thread being executed
+        if (t_id == 0)
+            t_num = omp_get_num_threads(); // Get total number of OMP threads
+    }
+
+#pragma omp parallel // Specify the block to be executed in parallel
+    {
+        int t_id = omp_get_thread_num(); // Get ID of thread being executed
+        printf("Hello World from thread %d of %d\n", t_id, t_num);
+    }
+
+    return 0;
+}
+```
+[Back to contents](#contents)
+### Thread private variables
+If we want the value of some variable to be persistent for a thread, we can define it as a thread private variable. This will ensure that the value will be attached to that thread regardless of which parallel block that thread is called in. `ThreadPrivateVar.c` provides a simple demonstration
+```
+int t_id;
+#pragma omp threadprivate(t_id)
+int main()
+{
+    int t_num;
+#pragma omp parallel // Specify the block to be executed in parallel
+    {
+        t_id = omp_get_thread_num(); // Get ID of thread being executed
+        if (t_id == 0)
+            t_num = omp_get_num_threads(); // Get total number of OMP threads
+    }
+
+#pragma omp parallel // Specify the block to be executed in parallel
+    printf("Hello World from thread %d of %d\n", t_id, t_num);
+```
+### #pragma omp barrier
+So far, we've been using two different parallel regions to synchronize the threads an act as an implicit barrier. We can implement this behaviour more explicitly by using the directive `#pragma omp barrier`. This produces the same result as above, without the need to define an extra parallel region.
+`OMPBarrier.c` implements `#pragma omp barrier`.
+```
+#include <omp.h> // OpenMP Header file
+#include <stdio.h>
+
+int main()
+{
+    int t_num;
+#pragma omp parallel // Specify the block to be executed in parallel
+    {
+        int t_id = omp_get_thread_num(); // Get ID of thread being executed
+        if (t_id == 0)
+            t_num = omp_get_num_threads(); // Get total number of OMP threads
+
+#pragma omp barrier
+        printf("Hello World from thread %d of %d\n", t_id, t_num);
+    }
+    return 0;
+}
+```
+### #pragma omp single
+We've been looking at barriers so far to achieve one goal - make a single thread perform some action and then synchronize all threads before moving to the next parallel block. This can be done more easily with the compiler directive `#pragma omp single`, as shown in `OMPSingle.c`. Whichever thread comes across `#pragma omp single` first will execute it.
+```
+#include <omp.h> // OpenMP Header file
+#include <stdio.h>
+
+int main()
+{
+    int t_num;
+#pragma omp parallel // Specify the block to be executed in parallel
+    {
+#pragma omp single
+        t_num = omp_get_num_threads(); // Get total number of OMP threads
+
+        int t_id = omp_get_thread_num(); // Get ID of thread being executed
+        printf("Hello World from thread %d of %d\n", t_id, t_num);
+    }
+    return 0;
+}
+```
+An implied barrier exists with `#pragma omp single` unless the `nowait` clause is applied to it
+```
+#pragma omp sinlge nowait
+```
+_This may cause an error depending on the application_
+### #pragma omp master
+If we want only the master thread to execute some code, we can use `#pragma omp master` instead of `#pragma omp single`. An implicit barrier does not exist, so this mathces `#pragma omp single nowait` in behaviour.
+```
+#include <omp.h> // OpenMP Header file
+#include <stdio.h>
+
+int main()
+{
+    int t_num;
+#pragma omp parallel // Specify the block to be executed in parallel
+    {
+        int t_id;
+#pragma omp master
+        t_num = omp_get_num_threads(); // Get total number of OMP threads
+        t_id = omp_get_thread_num(); // Get ID of thread being executed
+        printf("Hello World from thread %d of %d\n", t_id, t_num);
+    }
+    return 0;
+}
 ```
 
 [Back to contents](#contents)
