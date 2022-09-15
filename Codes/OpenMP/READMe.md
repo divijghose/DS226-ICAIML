@@ -304,5 +304,23 @@ int main()
 }
 ```
 ### The wrong way
+Consider the introduction of a parallel region in `SumArrayParallel_RacePlusRedundant.c`
+```
+    t_start = omp_get_wtime();
+#pragma omp parallel
+    {
+        for (i = 0; i < ARRAY_SIZE; i++) // Sum up the array
+            sum_arr += arr[i];
+    }
+    t_end = omp_get_wtime();
 
+    printf("Sum of array elements = %d. Time required to execute = %f seconds\n", sum_arr, t_end - t_start);
+
+```
+Clearly, there's a race condition on `sum_arr`. But this also has another problem - each thread tries to calculate the sum of the array independently, thereby making the whole operation redundant. Since each thread has its own cache overheads, the time required to execute this code is also more than the sequential one.
+
+### The wrong way, again - removing the redundancy
+To remove the redundancy in the previous code, we can make each thread compute part of the sum by manually distributing the array between the threads, 
+```
+```
 [Back to contents](#contents)

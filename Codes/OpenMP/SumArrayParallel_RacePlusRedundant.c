@@ -13,8 +13,11 @@ int main()
         arr[i] = 1;
 
     t_start = omp_get_wtime();
-    for (i = 0; i < ARRAY_SIZE; i++) // Sum up the array
-        sum_arr += arr[i];
+#pragma omp parallel
+    {
+        for (i = 0; i < ARRAY_SIZE; i++) // Sum up the array
+            sum_arr += arr[i];
+    }
     t_end = omp_get_wtime();
 
     printf("Sum of array elements = %d. Time required to execute = %f seconds\n", sum_arr, t_end - t_start);
