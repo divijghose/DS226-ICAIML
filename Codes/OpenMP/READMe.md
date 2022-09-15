@@ -11,6 +11,10 @@
     c. [#pragma omp barrier](#pragma-omp-barrier)\
     d. [#pragma omp single](#pragma-omp-single)\
     e. [#pragma omp master](#pragma-omp-master)
+[Parallelization using OpenMP](#parallelization-using-openmp)
+7. [Timing your code](#timing-your-code)
+6. [Computing the sum of an array](#computing-the-sum-of-an-array)\
+    a. [The wrong way](#the-wrong-way)
 
 ## What is OpenMP? 
 OpenMP (Open Multi-Processing) is an API that provides support for parallel programming in **shared-memory architectures**. It consists of compiler directives which are inserted in the code in regions that can be parallelised, a run-time library to execute these regions in parallel, and environment variables. OpenMP supports parallelism in C, C++ and Fortran, and is preffered for its portability and ease of use.
@@ -266,5 +270,39 @@ int main()
     return 0;
 }
 ```
+# Parallelization using OpenMP 
+## Timing your code
+`omp_get_wtime` and `omp_get_wtick` can be used to to get time in seconds (starting from some universal time) and the resolution of the timer respectively.
+
+[Back to contents](#contents)
+## Computing the sum of an array
+### Timing the sequential implementation
+Using `omp_get_wtime` to get the time stamps before and after the sequential execution of the sum of an array, we can get a rough idea of the benchmark for our parallel codes. Compile and execute `SumArraySequential.c` with an appropriate value of `ARRAY_SIZE` and check for yourself.
+```
+#include <omp.h>
+#include <stdio.h>
+
+#define ARRAY_SIZE 10000
+int arr[ARRAY_SIZE];
+
+int main()
+{
+    int i, sum_arr = 0;
+    double t_start, t_end;
+
+    for (i = 0; i < ARRAY_SIZE; i++) // Initialize array
+        arr[i] = 1;
+
+    t_start = omp_get_wtime();
+    for (i = 0; i < ARRAY_SIZE; i++) // Sum up the array
+        sum_arr += arr[i];
+    t_end = omp_get_wtime();
+
+    printf("Sum of array elements = %d. Time required to execute = %f seconds\n", sum_arr, t_end - t_start);
+
+    return 0;
+}
+```
+### The wrong way
 
 [Back to contents](#contents)
