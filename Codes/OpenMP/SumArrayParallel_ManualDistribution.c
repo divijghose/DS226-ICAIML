@@ -26,6 +26,7 @@ int main()
         // printf("Thread %d of %d starts at %d and ends at %d\n",t_id,t_num,arr_start,arr_end);
 
         for (i = arr_start; i <= arr_end; i++) // Sum up the array
+            #pragma omp critical
             sum_arr += arr[i];
     }
     t_end = omp_get_wtime();

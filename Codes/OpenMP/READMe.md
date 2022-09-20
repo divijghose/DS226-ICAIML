@@ -319,8 +319,62 @@ Consider the introduction of a parallel region in `SumArrayParallel_RacePlusRedu
 ```
 Clearly, there's a race condition on `sum_arr`. But this also has another problem - each thread tries to calculate the sum of the array independently, thereby making the whole operation redundant. Since each thread has its own cache overheads, the time required to execute this code is also more than the sequential one.
 
-### The wrong way, again - removing the redundancy
-To remove the redundancy in the previous code, we can make each thread compute part of the sum by manually distributing the array between the threads, 
+### The wrong way, again - critical sections
+To remove the redundancy in the previous code, we can make each thread compute part of the sum by manually distributing the array between the threads, and define a critical section for the sum calculation. A critical section is one which can only be accesed by one thread at a time, thereby eliminating race conditions. 
 ```
+#pragma omp parallel default(shared) private(i, t_id)
+    {
+        int arr_start, arr_end;
+        t_id = omp_get_thread_num();
+        t_num = omp_get_num_threads();
+        // Define the start and end points for the sub-array
+        arr_start = t_id * (ARRAY_SIZE / t_num);
+        arr_end = (t_id + 1)*(ARRAY_SIZE / t_num) - 1;
+        if (t_id == t_num) // for the last subarray
+            arr_end = ARRAY_SIZE - 1;
+        // printf("Thread %d of %d starts at %d and ends at %d\n",t_id,t_num,arr_start,arr_end);
+
+        for (i = arr_start; i <= arr_end; i++) // Sum up the array
+            #pragma omp critical
+            sum_arr += arr[i];
+    }
 ```
+Critical sections must be used catiously, though, as they have considerable overheads that slow down the code.
+
+### The correct way - #pragma omp for
+One correct way to distribute the work and use critical sections is to calculate partial sums of the contents of each thread (using the OpenMP for loop directive), and then add these partials sums into the total sums in a critical section.The corrected code can be found in `SumArrayParallel_Corrected`.
+```
+#include <omp.h>
+#include <stdio.h>
+
+#define ARRAY_SIZE 100000
+int arr[ARRAY_SIZE];
+
+int main()
+{
+    int i, t_id, t_num, sum_arr = 0;
+    double t_start, t_end;
+
+    for (i = 0; i < ARRAY_SIZE; i++) // Initialize array
+        arr[i] = 1;
+
+    t_start = omp_get_wtime();
+#pragma omp parallel default(shared) private(i, t_id)
+    {
+        int psum = 0;
+#pragma omp for
+        for (i = 0; i <= ARRAY_SIZE; i++)
+            psum += arr[i]; // Sum up the array
+
+#pragma omp critical
+        sum_arr += psum;
+    }
+    t_end = omp_get_wtime();
+
+    printf("Sum of array elements = %d. Time required to execute = %f seconds\n", sum_arr, t_end - t_start);
+
+    return 0;
+}
+```
+
 [Back to contents](#contents)
