@@ -1,7 +1,7 @@
 #include <omp.h>
 #include <stdio.h>
 
-#define ARRAY_SIZE 100000
+#define ARRAY_SIZE 1000000000
 int arr[ARRAY_SIZE];
 
 int main()
