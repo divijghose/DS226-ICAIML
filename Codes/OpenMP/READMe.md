@@ -1,6 +1,6 @@
 # A (gentle) introduction to OpenMP
 # Preface
-This repo has been created for students of DS-226 _Introduction to Computing for AI & ML_. The codes withing the `OpenMP` folder aim to illustrate some principles of parallel programming on shared-memory systems using the OpenMP paradigm. 
+This repo has been created for students of DS-226 _Introduction to Computing for AI & ML_. The codes within the `OpenMP` folder aim to illustrate some principles of parallel programming on shared-memory systems using the OpenMP paradigm. 
 You can download the repo as a `.zip` file from GitHub or clone it
 ```
 git clone https://github.com/divijghose/DS226-ICAIML
@@ -9,6 +9,13 @@ Then go to the `OpenMP` folder
 ```
 cd Codes/OpenMP
 ```
+The `makefile` will compile all the programs and generate their output files with the same name
+```
+make
+```
+
+
+
 # Contents
 1. [What is OpenMP](#what-is-openmp)
 2. [Hello World! (times n)](#hello-world-times-n)
@@ -22,15 +29,16 @@ cd Codes/OpenMP
     d. [#pragma omp single](#pragma-omp-single)\
     e. [#pragma omp master](#pragma-omp-master)
 [Parallelization using OpenMP](#parallelization-using-openmp)
-7. [Timing your code](#timing-your-code)
-6. [Computing the sum of an array](#computing-the-sum-of-an-array)\
+6. [Timing your code](#timing-your-code)
+7. [Computing the sum of an array](#computing-the-sum-of-an-array)\
     a. [The wrong way](#the-wrong-way)\
     b. [The wrong way, again - critical sections](#the-wrong-way-again---critical-sections)\
     c. [The correct way - #pragma omp for](#the-correct-way---pragma-omp-for)
+8. [Going ahead](#going-ahead)
 
 ## What is OpenMP? 
 OpenMP (Open Multi-Processing) is an API that provides support for parallel programming in **shared-memory architectures**. It consists of compiler directives which are inserted in the code in regions that can be parallelised, a run-time library to execute these regions in parallel, and environment variables. OpenMP supports parallelism in C, C++ and Fortran, and is preffered for its portability and ease of use.
-OpenMP is based on a _thread-based, fork-join model_.
+OpenMP uses a _thread-based, fork-join model_.
 
 [Back to contents](#contents)
 
@@ -419,3 +427,17 @@ int main()
  ```
 
 [Back to contents](#contents)
+
+## Going Ahead
+Once you're comfortable with the concepts listed above, you can try parallelizing some other linear algebra routines. In particular, you can start with - 
+1. Vector-Vector dot product
+2. Matrix-Vector multiplication
+3. Matrix-Matrix multiplication
+
+While working on these problems, you'll come across methods to further optimize your code (blocking, scheduling, etc.). Given below are some references to help you out:
+1. [List of texts on OpenMP](https://www.openmp.org/resources/openmp-books/)
+2. [Introduction to Parallel Computing by LLNL](https://hpc.llnl.gov/documentation/tutorials/introduction-parallel-computing-tutorial)
+3. [OpenMP Tutorial by LLNL](https://hpc-tutorials.llnl.gov/openmp/)
+
+[Back to contents](#contents)
+
