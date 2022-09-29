@@ -1,4 +1,14 @@
 # A (gentle) introduction to OpenMP
+# Preface
+This repo has been created for students of DS-226 _Introduction to Computing for AI & ML_. The codes withing the `OpenMP` folder aim to illustrate some principles of parallel programming on shared-memory systems using the OpenMP paradigm. 
+You can download the repo as a `.zip` file from GitHub or clone it
+```
+git clone https://github.com/divijghose/DS226-ICAIML
+```
+Then go to the `OpenMP` folder
+```
+cd Codes/OpenMP
+```
 # Contents
 1. [What is OpenMP](#what-is-openmp)
 2. [Hello World! (times n)](#hello-world-times-n)
@@ -378,5 +388,34 @@ int main()
     return 0;
 }
 ```
+There exists a more succint way of writing the for loop directive, and we can also get rid of the `psum` variable by applying a reduction on `sum_arr`. A cleaner version of the code above can be found in `SumArrayParallel.c`
+ ```
+ #include <omp.h>
+#include <stdio.h>
+
+#define ARRAY_SIZE 1000000000
+int arr[ARRAY_SIZE];
+
+int main()
+{
+    int i, sum_arr = 0;
+    double t_start, t_end;
+
+    for (i = 0; i < ARRAY_SIZE; i++) // Initialize array
+        arr[i] = 1;
+
+    t_start = omp_get_wtime();
+#pragma omp parallel for default(shared) reduction(+: sum_arr)
+    
+        for (i = 0; i <= ARRAY_SIZE; i++)
+            sum_arr += arr[i]; // Sum up the array
+    
+    t_end = omp_get_wtime();
+
+    printf("Sum of array elements = %d. Time required to execute = %f seconds\n", sum_arr, t_end - t_start);
+
+    return 0;
+}
+ ```
 
 [Back to contents](#contents)
