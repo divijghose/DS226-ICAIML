@@ -14,7 +14,9 @@
 [Parallelization using OpenMP](#parallelization-using-openmp)
 7. [Timing your code](#timing-your-code)
 6. [Computing the sum of an array](#computing-the-sum-of-an-array)\
-    a. [The wrong way](#the-wrong-way)
+    a. [The wrong way](#the-wrong-way)\
+    b. [The wrong way, again - critical sections](#the-wrong-way-again---critical-sections)\
+    c. [The correct way - #pragma omp for](#the-correct-way---pragma-omp-for)
 
 ## What is OpenMP? 
 OpenMP (Open Multi-Processing) is an API that provides support for parallel programming in **shared-memory architectures**. It consists of compiler directives which are inserted in the code in regions that can be parallelised, a run-time library to execute these regions in parallel, and environment variables. OpenMP supports parallelism in C, C++ and Fortran, and is preffered for its portability and ease of use.
